@@ -1,15 +1,13 @@
 #pragma once
 
-#include "StarTextureAtlas.hpp"
 #include "StarRenderer.hpp"
+#include "StarTextureAtlas.hpp"
 
 #include "GL/glew.h"
 
 namespace Star {
 
 STAR_CLASS(OpenGlRenderer);
-
-constexpr size_t FrameBufferCount = 1;
 
 // TODO: Bott - This isn't really rendering-specific. Don't really like it either. It's nicer than having redundant bool options, though.
 enum class BoolSettingMode {
@@ -39,6 +37,9 @@ public:
   Maybe<RenderEffectParameter> getEffectScriptableParameter(String const& effectName, String const& parameterName) override;
   Maybe<VariantTypeIndex> getEffectScriptableParameterType(String const& effectName, String const& parameterName) override;
   void setEffectTexture(String const& textureName, ImageView const& image) override;
+  void setEffectUniformBuffer(String const& effectName, String const& blockName, void const* data, size_t size) override;
+  void setEffectUniformBuffer(String const& effectName, String const& blockName, ByteArray const& data) override;
+  void setEffectUniformBufferData(String const& effectName, String const& blockName, void const* data, size_t size) override;
 
   void setScissorRect(Maybe<RectI> const& scissorRect) override;
 
@@ -186,11 +187,17 @@ private:
     GLint textureSizeUniform = -1;
     RefPtr<GlLoneTexture> textureValue;
   };
-  
+
+  struct EffectUniformBuffer {
+    GLuint bufferId = 0;
+    GLuint bindingPoint = 0;
+    size_t bufferSize = 0;
+  };
+
   struct GlFrameBuffer : RefCounter {
     GLuint id = 0;
     RefPtr<GlLoneTexture> texture;
-    
+
     bool hasAlt = false;
     GLuint altId = 0;
     RefPtr<GlLoneTexture> altTexture;
@@ -202,13 +209,13 @@ private:
     bool clear = true;
     unsigned multisample = 0;
     unsigned sizeDiv = 1;
-    
+
     bool blitted = false;
     bool justSwapped = false;
-    
+
     void makeAlt(Vec2U const& screenSize = Vec2U(256, 256));
     void swap();
-    
+
     GlFrameBuffer(Json const& config);
     ~GlFrameBuffer();
   };
@@ -218,8 +225,9 @@ private:
     GLuint program = 0;
     Json config;
     StringMap<EffectParameter> parameters;
-    StringMap<EffectParameter> scriptables; // scriptable parameters which can be changed when the effect is not loaded
+    StringMap<EffectParameter> scriptables;// scriptable parameters which can be changed when the effect is not loaded
     StringMap<EffectTexture> textures;
+    StringMap<EffectUniformBuffer> uniformBuffers;
 
     StringMap<GLuint> attributes;
     StringMap<GLuint> uniforms;
@@ -233,7 +241,6 @@ private:
   static bool logGlErrorSummary(String prefix);
   static void uploadTextureImage(PixelFormat pixelFormat, Vec2U size, uint8_t const* data);
 
-  
   static RefPtr<GlLoneTexture> createGlTexture(ImageView const& image, TextureAddressing addressing, TextureFiltering filtering);
 
   shared_ptr<GlRenderBuffer> createGlRenderBuffer();
@@ -275,7 +282,7 @@ private:
 
   bool m_limitTextureGroupSize;
   bool m_useMultiTexturing;
-  unsigned m_multiSampling; // if non-zero, is enabled and acts as sample count
+  unsigned m_multiSampling;// if non-zero, is enabled and acts as sample count
   bool m_hdrSetting;
   List<shared_ptr<GlTextureGroup>> m_liveTextureGroups;
 
@@ -283,4 +290,4 @@ private:
   shared_ptr<GlRenderBuffer> m_immediateRenderBuffer;
 };
 
-}
+}// namespace Star

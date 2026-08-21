@@ -1,11 +1,12 @@
 #pragma once
 
-#include "StarVariant.hpp"
-#include "StarImage.hpp"
-#include "StarPoly.hpp"
-#include "StarJson.hpp"
 #include "StarBiMap.hpp"
+#include "StarByteArray.hpp"
+#include "StarImage.hpp"
+#include "StarJson.hpp"
+#include "StarPoly.hpp"
 #include "StarRefPtr.hpp"
+#include "StarVariant.hpp"
 
 namespace Star {
 
@@ -145,6 +146,9 @@ public:
   virtual Maybe<RenderEffectParameter> getEffectScriptableParameter(String const& effectName, String const& parameterName) = 0;
   virtual Maybe<VariantTypeIndex> getEffectScriptableParameterType(String const& effectName, String const& parameterName) = 0;
   virtual void setEffectTexture(String const& textureName, ImageView const& image) = 0;
+  virtual void setEffectUniformBuffer(String const& effectName, String const& blockName, void const* data, size_t size) = 0;
+  virtual void setEffectUniformBuffer(String const& effectName, String const& blockName, ByteArray const& data) = 0;
+  virtual void setEffectUniformBufferData(String const& effectName, String const& blockName, void const* data, size_t size) = 0;
   virtual bool switchEffectConfig(String const& name) = 0;
 
   // Any further rendering will be scissored based on this rect, specified in
@@ -152,8 +156,8 @@ public:
   virtual void setScissorRect(Maybe<RectI> const& scissorRect) = 0;
 
   virtual TexturePtr createTexture(Image const& texture,
-      TextureAddressing addressing = TextureAddressing::Clamp,
-      TextureFiltering filtering = TextureFiltering::Nearest) = 0;
+                                   TextureAddressing addressing = TextureAddressing::Clamp,
+                                   TextureFiltering filtering = TextureFiltering::Nearest) = 0;
   virtual void setSizeLimitEnabled(bool enabled) = 0;
   virtual void setMultiTexturingEnabled(bool enabled) = 0;
   virtual void setMultiSampling(unsigned multiSampling) = 0;
@@ -168,4 +172,4 @@ public:
   virtual void flush(Mat3F const& transformation = Mat3F::identity()) = 0;
 };
 
-}
+}// namespace Star
